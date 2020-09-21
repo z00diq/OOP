@@ -1,0 +1,313 @@
+// oop_lab6.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+#include <iostream>
+#include <iterator>
+#include <functional>
+#include <algorithm>
+#include <string>
+using  namespace std;
+
+class Production {
+private:
+	string name;
+	int number;
+	int corpNumber;
+	//Production(const Production&);
+public:
+	Production();
+	string getName() { return name; };// get -считать из экземпляра
+	void setName(string data) { name = data; };
+	int getNumber() { return number; };
+	void setNumber(int data) { number = data; };
+	int getCorpNumber() { return corpNumber; };
+	void setCorpNumber(int data) { corpNumber = data; };
+	friend ostream& operator<< (ostream &out, const Production item);
+	friend bool operator> (const Production &prod1, const Production &prod2);
+	//перегрузка оператора сравнения
+};
+
+ostream& operator<< (ostream &out, const Production item)
+{
+	out << "Имя изделия: " << item.name << " | " << "Количество изделий: " << item.number << " | "
+		<< "Номер цеха сборки: " << "№" << item.corpNumber << " | \n";
+	return out;
+}
+bool operator>(const Production & prod1, const Production & prod2)
+{
+	if (prod1.number > prod2.number)
+		return true;
+	else
+		return false;
+}
+
+Production::Production()
+{
+	cout << "_____________________________________" << endl;
+
+}
+
+
+
+template <typename T>
+class MyVector
+{
+private:
+	T *element;
+	int size;
+public:
+	class Iterator
+	{
+		T *cur;
+	public:
+		Iterator(T *first) : cur(first) {}
+
+		T& operator+ (int n) { return *(cur + n); }
+		T& operator- (int n) { return *(cur - n); }
+
+		T* operator++ (int) { return cur++; }
+		T* operator-- (int) { return cur--; }
+		T* operator++ () { return ++cur; }
+		T* operator-- () { return --cur; }
+
+		bool operator!= (const Iterator& it) { return cur != it.cur; }
+		bool operator== (const Iterator& it) { return cur == it.cur; }
+		T& operator* () { return *cur; };
+	};
+	MyVector();
+	~MyVector();
+	void push_back(const T value);
+	void pop_back();
+	T& operator[](const int &index);
+	int getSize();
+	void setSize(int data) { size = data; }
+	T* getVector() { return element; };
+	void setVector(T* data) { element = data; };
+	Iterator begin() { return element; }
+	Iterator end() { return element + size; }
+	Iterator rbegin() { return element + (size - 1); }
+	Iterator rend() { return element - 1; }
+	Iterator current(int index) { return &element[index]; }
+
+};
+
+template <typename T>
+class Algorithm :public MyVector<T>
+{
+public:
+	void FastSort(MyVector<T>::Iterator first, MyVector<T>::Iterator last);
+	T* FindeElem(MyVector<T>::Iterator first, MyVector<T>::Iterator last, string FindName);
+	void DeleteElem(MyVector<T>::Iterator first, MyVector<T>::Iterator last, string FindName);
+};
+
+
+
+template<typename T>
+MyVector<T>::MyVector()
+{
+	this->element = new T[size];
+}
+
+template<typename T>
+MyVector<T>::~MyVector()
+{
+	delete[] element;
+}
+
+template<typename T>
+void MyVector<T>::push_back(const T value)
+{
+	if (size == 0)
+	{
+		T *newarr = new T[++size];
+		newarr[0] = value;
+		element = newarr;
+	}
+	else
+	{
+		T *newarr = new T[size + 1];
+		for (int i = 0; i < size; i++)
+		{
+			newarr[i] = element[i];
+		}
+		newarr[size++] = value;
+
+		element = newarr;
+	}
+
+}
+
+template<typename T>
+void MyVector<T>::pop_back()
+{
+	T *newarr = new T[size - 1];
+	for (int i = 0; i < size - 1; i++)
+	{
+		newarr[i] = element[i];
+	}
+	delete[] element;
+	element = newarr;
+	size--;
+}
+
+template<typename T>
+T & MyVector<T>::operator[](const int &index)
+{
+	return element[index];
+}
+
+template<typename T>
+int MyVector<T>::getSize()
+{
+	return size;
+}
+
+ 
+
+
+
+
+int main()
+{
+	try
+	{
+		setlocale(LC_ALL, "ru");
+		Algorithm<Production> myvec;
+		cout << "Введите количчество элементов" << endl;
+		int n;
+		cin >> n;
+		for (int i = 0; i < n; i++)
+		{
+			Production a;
+
+			string name;
+			cout << "Наименование: ";
+			cin >> name;
+			int num;
+			cout << "Количество изделий: ";
+			cin >> num;
+			int corpNum;
+			cout << "Номер цеха сборки: ";
+			cin >> corpNum;
+			if (!cin)
+				throw exception("Некорректный ввод даных");
+			a.setName(name);
+			a.setNumber(num);
+			a.setCorpNumber(corpNum);
+			myvec.push_back(a);
+		}
+		auto it = MyVector<Production>::Iterator(myvec.begin());
+		auto jt = MyVector<Production>::Iterator(myvec.end());
+		while (it != jt)
+		{
+			cout << *it << "\t";
+			it++;
+		}
+		myvec.FastSort(MyVector<Production>::Iterator(myvec.begin()), MyVector<Production>::Iterator(myvec.end()));
+		cout << endl;
+		it = MyVector<Production>::Iterator(myvec.rbegin());
+		jt = MyVector<Production>::Iterator(myvec.rend());
+		while (it != jt)
+		{
+			cout << *it << "\t";
+			it--;
+		}
+		Production* elem = myvec.FindeElem(MyVector<Production>::Iterator(myvec.begin()), MyVector<Production>::Iterator(myvec.end()), "aaa");
+		cout<<"Первый найденный элемент "<<endl;
+		cout << *elem;
+		myvec.DeleteElem(MyVector<Production>::Iterator(myvec.begin()), MyVector<Production>::Iterator(myvec.end()), "aaa");
+		cout << endl;
+		it = MyVector<Production>::Iterator(myvec.begin());
+		jt = MyVector<Production>::Iterator(myvec.end());
+		while (it != jt)
+		{
+			cout << *it << "\t";
+			it++;
+		}
+	}
+	catch (exception &ex)
+	{
+		cout << ex.what() << endl;
+	}
+}
+
+// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
+// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+
+// Советы по началу работы 
+//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
+//   2. В окне Team Explorer можно подключиться к системе управления версиями.
+//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
+//   4. В окне "Список ошибок" можно просматривать ошибки.
+//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
+//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+
+template<typename T>
+void Algorithm<T>::FastSort(MyVector<T>::Iterator first, MyVector<T>::Iterator last)
+{
+	if (first != last) {
+		MyVector<T>::Iterator left = first;
+		MyVector<T>::Iterator right = last;
+		MyVector<T>::Iterator pivot = first;
+		left++;
+		while (left != right) {
+			if (*left > *pivot) {
+				++left;
+			}
+			else {
+				while ((left != --right) && (*pivot > *right));
+				iter_swap(left, right);
+			}
+		}
+		--left;
+		iter_swap(first, left);
+		FastSort(first, left);
+		FastSort(right, last);
+	}
+}
+
+template<typename T>
+T* Algorithm<T>::FindeElem(MyVector<T>::Iterator first, MyVector<T>::Iterator last, string FindName)
+{
+	bool has=false;
+	while (first != last) 
+	{
+		T elem = *first;
+		if (elem.getName() == FindName)
+		{
+			return &*first;
+			has = true;
+			
+		}
+		if (has == true)
+			break;
+		first++;
+	}
+	if (has = false)
+		cout << "Not found" << endl;
+}
+
+template<typename T>
+void Algorithm<T>::DeleteElem(MyVector<T>::Iterator first, MyVector<T>::Iterator last, string FindName)
+{
+	T *newarr = new T[this->getSize()];
+	int i = 0;
+	while (first != last) 
+	{
+		newarr[i++] = *first;
+		first++;
+	}
+	int newsize = 0;
+	T *arr = new T[this->getSize()];
+	for(int i=0;i< this->getSize();i++)
+	{
+		if (newarr[i].getName() != FindName) 
+		{
+			arr[newsize++] = newarr[i];
+		}
+	}
+	newarr = new T[newsize];
+	newarr = arr;
+	delete[] this->getVector();
+	this->setVector(newarr);
+	this->setSize(newsize);
+}
