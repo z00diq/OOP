@@ -1,0 +1,124 @@
+#include <iostream>
+#include <string>
+#include <random>
+
+using namespace std;
+
+const int N_WORDS = 5;
+
+class Game {
+private:
+	const string WORDS[N_WORDS] = { "applycation", "capture", "salary", "weekends", "authentification" };
+	const string simbols = "qwertyuiopasdfghjklzxcvbnm";
+	string usesSimbols = "";
+	bool isGameOver = true;
+	int gameNumberWord = 0;
+	int gameWordSearchSumbol = 0;
+	char *gameWord;
+public:
+	Game() {};
+	void start();
+	void GameMenu();
+	void newGameWord();
+	void gameOver();
+	void searchLatter();
+	void showRezalts();
+};
+
+void Game::GameMenu() {
+	cout << endl << "0 for game over" << endl;
+	cout << "1 for write new letter" << endl;
+	cout << "2 for start new game" << endl;
+}
+
+void Game::searchLatter() {
+	cout << endl << "Write search letter: ";
+	char newSumbol;
+	cin >> newSumbol;
+	if ((this->simbols.find(newSumbol) != string::npos) && (this->usesSimbols.find(newSumbol) == std::string::npos)) {
+		this->usesSimbols += newSumbol;
+		if (this->WORDS[this->gameNumberWord].find(newSumbol) != std::string::npos) {
+			for (int i = 0; i < this->WORDS[this->gameNumberWord].length(); ++i) {
+				if (this->WORDS[this->gameNumberWord][i] == newSumbol) {
+					this->gameWord[i] = newSumbol;
+					++this->gameWordSearchSumbol;
+				}
+			}
+			if (this->gameWordSearchSumbol == this->WORDS[this->gameNumberWord].length()) {
+				this->gameOver();
+			}
+		}
+		else {
+			cout << "This word doesn't have its letter" << endl;
+		}
+	}
+	else {
+		cout << "this sumbol is not find in alfovit or your use its";
+	}
+}
+
+void Game::newGameWord() {
+	this->gameNumberWord = rand() % N_WORDS;
+	this->gameWord = new char[this->WORDS[this->gameNumberWord].length()];
+	for (int i = 0; i < this->WORDS[this->gameNumberWord].length(); ++i) {
+		this->gameWord[i] = '_';
+	}
+}
+
+void Game::showRezalts() {
+	if (this->isGameOver) {
+		bool isExit = false;
+		for (int i = 0; i < this->WORDS[this->gameNumberWord].length(); ++i) {
+			if (this->gameWord[i] == '_') {
+				isExit = !isExit;
+				break;
+			}
+		}
+		if (isExit) {
+			cout << endl << "Your word: " << this->WORDS[this->gameNumberWord] << endl;
+		}
+		else {
+			cout << endl << "You win and your word: " << this->WORDS[this->gameNumberWord] << endl;
+		}
+	}
+	else {
+		cout << endl;
+		for (int i = 0; i < this->WORDS[this->gameNumberWord].length(); ++i) {
+			cout << this->gameWord[i];
+		}
+		cout << endl;
+	}
+}
+
+void Game::gameOver() {
+	this->isGameOver = true;
+}
+
+void Game::start() {
+	string gameStart = "y";
+	while (gameStart != "n") {
+		newGameWord();
+		this->isGameOver = false;
+		while (!this->isGameOver) {
+			this->GameMenu();
+			string c;
+			cin >> c;
+			switch (stoi(c)) {
+			case 0: this->gameOver(); break;
+			case 1: this->searchLatter(); break;
+			case 2: this->newGameWord(); break;
+			default: break;
+			}
+			showRezalts();
+		}
+		cout << endl << "Write n for exit" << endl;
+		cin >> gameStart;
+	}
+}
+
+int main()
+{
+	Game* game = new Game();
+	game->start();
+	return 0;
+}
