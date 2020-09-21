@@ -1,0 +1,312 @@
+// oop_laba2(consApp11__lab1).cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+
+using namespace std;
+
+class Production {
+private:
+	static int Comparasing;
+	string name;
+	int number;
+	int corpNumber;
+	//Production(const Production&);
+public:
+	static void ComparasingField(int n);
+	Production();
+	string getName() { return name; };// get -считать из экземпляра
+	void setName(string data) {  name = data; };
+	int getNumber() { return number; };
+	void setNumber(int data) { number = data; };
+	int getCorpNumber() { return corpNumber; };
+	void setCorpNumber(int data) { corpNumber = data; };
+	friend ostream& operator<< (ostream &out, const Production item);
+	friend bool operator> (const Production &prod1, const Production &prod2);
+	friend bool operator< (const Production &prod1, const Production &prod2);
+	//перегрузка оператора сравнения
+};
+int Production::Comparasing;
+
+ostream& operator<< (ostream &out, const Production item)
+{
+	out << "Имя изделия: " << item.name<<" | " << "Количество изделий: " << item.number << " | "
+		<< "Номер цеха сборки: " << "№" << item.corpNumber << " | \n";
+	return out;
+}
+bool operator>(const Production & prod1, const Production & prod2)
+{
+	if (prod1.number > prod2.number)
+		return true;
+	else
+		return false;
+}
+bool operator<(const Production & prod1, const Production & prod2)
+{
+	int num = Production::Comparasing;
+		if (num == 1)
+			return prod1.name > prod2.name;
+		else if (num == 2)
+			return prod1.number > prod2.number;
+		else if (num == 3)
+			return prod1.corpNumber > prod2.corpNumber;
+};
+
+template<typename T>
+class list 
+{
+private: 
+
+	template<typename T>
+	class Node
+	{
+	public:
+		Node *pNext;
+		T data;
+		Node( T data = T(),Node *pNext = nullptr)
+		{
+			this->data = data;
+			this->pNext = pNext;
+		}
+	};
+	int size;
+	Node<T> *head;
+public:
+	list();
+	~list();
+	void pop_front();
+	void clear();
+	void showForCorp(int number);
+	void push_back(T data);
+	int getSize() { return size; }
+	T& operator[](const int index);
+
+	void ShellSort();
+	
+};
+
+
+template<typename T>
+list<T>::list() 
+{
+	size = 0;
+	head = nullptr;
+}
+
+template<typename T>
+list<T>::~list()
+{ 
+}
+
+template<typename T>
+void list<T>::pop_front()
+{
+	Node<T> *temp = head;
+	head = head->pNext;
+	delete temp;
+	size--;
+}
+
+template<typename T>
+void list<T>::clear()
+{
+	while(size)
+	{
+		pop_front();
+		
+	}
+}
+
+template<typename T>
+void list<T>::showForCorp(int number)
+{
+	
+	vector<T> vec;
+	list<T> lst = *this;	
+	for (int i = 0; i < size; i++)
+		if (lst[i].getCorpNumber() == number)
+			vec.push_back(lst[i]);
+	std::sort(vec.begin(), vec.end(), [](const T &elem1,const T &elem2) 
+	{
+		return elem1 > elem2;
+	});
+	for(auto elemet:vec)
+	{
+		cout << elemet << endl;
+	}
+	
+}
+
+template<typename T>
+void list<T>::ShellSort()
+{
+	cout << "Введите поле сортировки 1-Наименование 2-Количество 3-Цех сборки" << endl;
+	int n;
+	cin >> n;
+	T::ComparasingField(n);
+	list<T> lst = *this;
+	int d = size / 2;                        //Длина промежутков между элементами
+	while (d > 0)
+	{
+		for (int i = 0; i < size - d; i++)
+		{
+			int j = i;
+			while (j >= 0 && lst[j] < lst[j + d])
+			{
+				T temp = lst[j];
+				lst[j] = lst[j + d];
+				lst[j + d] = temp;
+				j--;
+			}
+		}
+		d = d / 2;
+	}
+}
+
+
+template<typename T>
+void list<T>::push_back(T data)
+{
+	if (head == nullptr)
+		head = new Node<T>(data);
+	else 
+	{
+		Node<T> *current = this->head;
+		while (current->pNext!=nullptr) 
+		{
+			current = current->pNext;
+		}
+		current->pNext = new Node<T>(data);
+	}
+	size++;
+}
+template<typename T>
+T& list<T>::operator[](const int index)
+{ 
+	int counter = 0;
+	Node<T> *current = this->head;
+	while(current!=nullptr)
+	{
+		if (counter==index)
+		{
+			return current->data;
+		}
+		current = current->pNext;
+		counter++; 
+	}
+}
+
+
+
+template<typename T>
+class fileClass {
+public:
+	static void loadFile(string fileName, T data) {
+		ofstream fout;
+		fout.open(fileName + ".txt",fstream::app);
+		if (!fout.is_open()) 
+		{
+			throw exception("Невозможно создатть файл");
+		}
+		else
+		{
+			cout << "Файл создан, запись данных" << endl;
+			fout << data;
+		}
+		/*TODO:ЗАПИСЬ В ФАЙЛ*/
+	}
+	static void readFile(string fileName) {
+		ifstream fin;
+		fin.open(fileName + ".txt");
+		if (!fin.is_open())
+			throw exception("Невозможно открыть файл");
+		else 
+		{
+			cout << "Файл открыт" << endl;
+			char ch;
+			while(fin.get(ch))
+			{
+				cout << ch;
+			}
+		}
+		fin.close();
+	}
+};
+
+int main()
+{
+	setlocale(LC_ALL, "ru");
+	list<Production> lst;
+	cout<<"Введите количчество элементов"<<endl;
+	int n;
+	cin >> n;
+	for(int i=0;i<n;i++)
+	{
+		Production a;
+
+		string name;
+		cout << "Наименование: ";
+		cin >> name;
+		int num;
+		cout << "Количество изделий: ";
+		cin >> num;
+		int corpNum;
+		cout << "Номер цеха сборки: ";
+		cin >> corpNum;
+		a.setName(name);
+		a.setNumber(num);
+		a.setCorpNumber(corpNum);
+		lst.push_back(a);
+	}
+	cout << "До сортировки" << endl;
+	for (int i = 0; i < lst.getSize(); i++) 
+		cout << lst[i] << endl;
+	lst.ShellSort();
+	cout << "После сортровки" << endl;
+	for (int i = 0; i < lst.getSize(); i++)
+		cout << lst[i];
+	cout << "Введите номер цеха" << endl;
+	int num;
+	cin >> num;
+	lst.showForCorp(num);
+	try
+	{
+		for (int i = 0; i < lst.getSize(); i++)
+			fileClass<Production>::loadFile("Mefile", lst[i]);
+		fileClass<Production>::readFile("Mefile");
+	}
+	catch(exception &ex)
+	{
+		cout << ex.what() << endl;
+	}
+}
+
+// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
+// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+
+// Советы по началу работы 
+//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
+//   2. В окне Team Explorer можно подключиться к системе управления версиями.
+//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
+//   4. В окне "Список ошибок" можно просматривать ошибки.
+//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
+//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+
+
+
+ void Production::ComparasingField(int n)
+{
+	Production::Comparasing = n;
+}
+
+Production::Production()
+{
+	cout << "_____________________________________" << endl;
+	
+}
+
