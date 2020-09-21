@@ -1,0 +1,393 @@
+// oop_lab4.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class Production {
+private:
+	static int Comparasing;
+	char* name;
+	int number;
+	int corpNumber;
+	//Production(const Production&);
+public:
+	void Print();
+	static void ComparasingField(int n);
+	Production();
+	char* getName() { return name; };// get -считать из экземпляра
+	void setName(char* data) { name = data; };
+	int getNumber() { return number; };
+	void setNumber(int data) { number = data; };
+	int getCorpNumber() { return corpNumber; };
+	void setCorpNumber(int data) { corpNumber = data; };
+	friend ostream& operator<< (ostream &out, const Production item);
+	friend bool operator> (const Production &prod1, const Production &prod2);
+	friend bool operator< (const Production &prod1, const Production &prod2);
+	//перегрузка оператора сравнения
+};
+int Production::Comparasing;
+
+void Production:: Print()
+{
+	cout << "Имя изделия: " << name << " | " << "Количество изделий: " << number << " | "
+		<< "Номер цеха сборки: " << "№" << corpNumber << " | \n";
+}
+
+ostream& operator<< (ostream &out, const Production item)
+{
+	out << "Имя изделия: " << item.name << " | " << "Количество изделий: " << item.number << " | "
+		<< "Номер цеха сборки: " << "№" << item.corpNumber << " | \n";
+	return out;
+}
+bool operator>(const Production & prod1, const Production & prod2)
+{
+	if (prod1.number > prod2.number)
+		return true;
+	else
+		return false;
+}
+bool operator<(const Production & prod1, const Production & prod2)
+{
+	int num = Production::Comparasing;
+	if (num == 1) 
+	{
+		string str, str1;
+		str = prod1.name;
+		str1 = prod2.name;
+		return str > str1;
+	}
+		
+	else if (num == 2)
+		return prod1.number > prod2.number;
+	else if (num == 3)
+		return prod1.corpNumber > prod2.corpNumber;
+};
+
+template<typename T>
+class list
+{
+private:
+
+	template<typename T>
+	class Node
+	{
+	public:
+		Node *pNext;
+		T data;
+		Node(T data = T(), Node *pNext = nullptr)
+		{
+			this->data = data;
+			this->pNext = pNext;
+		}
+	};
+	int size;
+	Node<T> *head;
+public:
+	list();
+	~list();
+	void pop_front();
+	void clear();
+	void showForCorp(int number);
+	void push_back(T data);
+	int getSize() { return size; }
+	T& operator[](const int index);
+
+
+};
+
+template<typename T>
+class BinaryFile
+{
+public:
+	static void Write(string filename, T data);
+	static void Read(string filename);
+	static void ShellSort(string filename, int size);
+	static void EditOne(string filename);
+
+};
+
+
+int main()
+{
+	try
+	{
+		setlocale(LC_ALL, "ru");
+		list<Production> lst;
+		cout << "Введите количчество элементов" << endl;
+		int n;
+		cin >> n;
+		for (int i = 0; i < n; i++)
+		{
+			Production a;
+
+			char* name = new char[128];
+			cout << "Наименование: ";
+			cin >> name;
+			int num;
+			cout << "Количество изделий: ";
+			cin >> num;
+			int corpNum;
+			cout << "Номер цеха сборки: ";
+			cin >> corpNum;
+			a.setName(name);
+			a.setNumber(num);
+			a.setCorpNumber(corpNum);
+			lst.push_back(a);
+			BinaryFile<Production>::Write("MyFile", a);
+			
+		}
+		BinaryFile<Production>::Read("MyFile");
+		cout << "_________________" << endl;
+		BinaryFile<Production>::ShellSort("MyFile", lst.getSize());
+		cout << "_________________" << endl;
+		BinaryFile<Production>::Read("MyFile");
+		cout << "_________________" << endl;
+		BinaryFile<Production>::EditOne("MyFile");
+		BinaryFile<Production>::Read("MyFile");
+	}
+
+	catch (exception& ex)
+	{
+		cout << ex.what();
+	}
+}
+
+// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
+// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+
+// Советы по началу работы 
+//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
+//   2. В окне Team Explorer можно подключиться к системе управления версиями.
+//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
+//   4. В окне "Список ошибок" можно просматривать ошибки.
+//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
+//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+
+
+template<typename T>
+void BinaryFile<T>::Write(string filename, T data)
+{
+	ofstream fs;
+	fs.open(filename + ".dat", ofstream::binary | ofstream::app | ofstream::out);
+	if (fs.is_open())
+	{
+		fs.write((char*)&data, sizeof(T));
+
+	}
+	else throw exception("Невозможно открыть файл");
+	fs.close();
+}
+
+template<typename T>
+void BinaryFile<T>::Read(string filename)
+{
+	T data;
+	ifstream fs;
+	fs.open(filename + ".dat", ifstream::binary);
+	if(fs.is_open())
+	{
+		while(fs.read((char*)&data, sizeof(T)))
+		cout << data;
+	}
+	else throw exception("Невозможно открыть файл для чтения");
+	fs.close();
+	
+	
+}
+
+template<typename T>
+void BinaryFile<T>::ShellSort(string filename, int size)
+{
+	T data;
+	fstream fs;
+	fs.open(filename + ".DAT", fstream::binary | fstream::in | fstream::out);
+	if (!fs.is_open())
+		throw exception("Невозможно открыть файл");
+	cout << "Введите поле сортировки 1-Наименование 2-Количество 3-Цех сборки" << endl;
+	int n;
+	cin >> n;
+	T::ComparasingField(n);
+	int d = size / 2;    
+		//Длина промежутков между элементами
+	while (d > 0)
+	{
+		for (int i = 0; i < size - d; i++)
+		{
+			int j = i;
+			while (j>=0)
+			{
+				T temp, temp2;
+				fs.seekg(sizeof(T)*j, ios_base::beg);
+				fs.read((char*)&temp, sizeof(T));
+				fs.seekg(sizeof(T)*(j + d), ios_base::beg);
+				fs.read((char*)&temp2, sizeof(T));
+				if (temp < temp2)
+				{
+					fs.seekp(sizeof(T)*j, ios_base::beg);
+					fs.write((char*)&temp2, sizeof(T));
+					fs.seekp(sizeof(T)*(j + d), ios_base::beg);
+					fs.write((char*)&temp, sizeof(T));
+					
+				}
+				j--;
+
+				//fs.seekg(sizeof(T)*j, ios_base::beg);
+				//fs.write(fs.read((char*)&data, sizeof(T)*j + d), sizeof(T)*j);
+				//fs.write(fs.read((char*)&temp, sizeof(T)), sizeof(T)*j+d);
+				//T temp = lst[j];
+				//lst[j] = lst[j + d];
+				//lst[j + d] = temp;
+
+			}
+		}
+		d = d / 2;
+	}
+	fs.close();
+}
+
+template<typename T>
+void BinaryFile<T>::EditOne(string filename)
+{
+	char* name = new char[128];
+	cout << "Наименование: ";
+	cin >> name;
+	int num;
+	cout << "Количество изделий: ";
+	cin >> num;
+	int corpNum;
+	cout << "Номер цеха сборки: ";
+	cin >> corpNum;
+	fstream fs;
+	fs.open(filename + ".dat", fstream::binary | fstream::in | fstream::out);
+	if (fs.is_open())
+	{
+		int j = 0;
+		T data;
+		while (fs.read((char*)&data, sizeof(T)))
+		{
+			if(*data.getName()==*name && data.getNumber() == num && data.getCorpNumber() == corpNum)
+			{
+				cout << data;
+				cout << "Введите новые данные" << endl;
+				char* name1 = new char[128];
+				cout << "Наименование: ";
+				cin >> name1;
+				int num1;
+				cout << "Количество изделий: ";
+				cin >> num1;
+				int corpNum1;
+				cout << "Номер цеха сборки: ";
+				cin >> corpNum1;
+				data.setName(name1);
+				data.setNumber(num1);
+				data.setCorpNumber(corpNum1);
+				fs.seekp(sizeof(T)*j, SEEK_SET);
+				fs.write((char*)&data, sizeof(T));
+				fs.seekg(sizeof(T)*(j+1), SEEK_SET);
+			}
+			j++;
+		}
+	}
+	else throw exception("Файл не найден");
+	fs.close();
+}
+
+template<typename T>
+list<T>::list()
+{
+	size = 0;
+	head = nullptr;
+}
+
+template<typename T>
+list<T>::~list()
+{
+}
+
+template<typename T>
+void list<T>::pop_front()
+{
+	Node<T> *temp = head;
+	head = head->pNext;
+	delete temp;
+	size--;
+}
+
+template<typename T>
+void list<T>::clear()
+{
+	while (size)
+	{
+		pop_front();
+
+	}
+}
+
+template<typename T>
+void list<T>::showForCorp(int number)
+{
+
+	vector<T> vec;
+	list<T> lst = *this;
+	for (int i = 0; i < size; i++)
+		if (lst[i].getCorpNumber() == number)
+			vec.push_back(lst[i]);
+	std::sort(vec.begin(), vec.end(), [](const T &elem1, const T &elem2)
+	{
+		return elem1 > elem2;
+	});
+	for (auto elemet : vec)
+	{
+		cout << elemet << endl;
+	}
+
+}
+
+template<typename T>
+void list<T>::push_back(T data)
+{
+	if (head == nullptr)
+		head = new Node<T>(data);
+	else
+	{
+		Node<T> *current = this->head;
+		while (current->pNext != nullptr)
+		{
+			current = current->pNext;
+		}
+		current->pNext = new Node<T>(data);
+	}
+	size++;
+}
+template<typename T>
+T& list<T>::operator[](const int index)
+{
+	int counter = 0;
+	Node<T> *current = this->head;
+	while (current != nullptr)
+	{
+		if (counter == index)
+		{
+			return current->data;
+		}
+		current = current->pNext;
+		counter++;
+	}
+}
+
+void Production::ComparasingField(int n)
+{
+	Production::Comparasing = n;
+}
+
+Production::Production()
+{
+	cout << "_____________________________________" << endl;
+
+}
+
+
