@@ -1,0 +1,221 @@
+
+
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <algorithm>
+#include <iterator>
+#include <functional>
+#include <utility>
+#include <deque>
+using  namespace std;
+
+class Production {
+private:
+	string name;
+	int number;
+	int corpNumber;
+public:
+	Production();
+	string getName() { return name; };// get -считать из экземпляра
+	void setName(string data) { name = data; };
+	int getNumber() { return number; };
+	void setNumber(int data) { number = data; };
+	int getCorpNumber() { return corpNumber; };
+	void setCorpNumber(int data) { corpNumber = data; };
+	friend ostream& operator<< (ostream &out, const Production item);
+	friend bool operator> (const Production &prod1, const Production &prod2);
+	
+};
+
+ostream& operator<< (ostream &out, const Production item)
+{
+	out << "Имя изделия: " << item.name << " | " << "Количество изделий: " << item.number << " | "
+		<< "Номер цеха сборки: " << "№" << item.corpNumber << " | \n";
+	return out;
+}
+bool operator>(const Production & prod1, const Production & prod2)
+{
+	if (prod1.number > prod2.number)
+		return true;
+	else
+		return false;
+}
+
+Production::Production()
+{
+	cout << "_____________________________________" << endl;
+
+}
+template <typename T>
+class Algorithm 
+{
+	deque<T> items;
+	int count = 0;
+	void FastSort(deque<Production>::iterator first, deque<Production>::iterator last);
+public:
+	void AddHead(T);
+	void AddTail(T);
+	void ShowDeque();
+	void FastSort();
+	T FindeElem(string findprops);
+	void DeleteElem(string findprops);
+};
+
+int main()
+{
+	try
+	{
+		setlocale(LC_ALL, "ru");
+		Algorithm<Production> myvec;
+		string str;
+		cout << "Введите количчество элементов" << endl;
+		int n;
+		cin >> n;
+		for (int i = 0; i < n; i++)
+		{
+			Production a;
+
+			string name;
+			cout << "Наименование: ";
+			cin >> name;
+			int num;
+			cout << "Количество изделий: ";
+			cin >> num;
+			int corpNum;
+			cout << "Номер цеха сборки: ";
+			cin >> corpNum;
+			if (!cin)
+				throw exception("Некорректный ввод даных");
+			a.setName(name);
+			a.setNumber(num);
+			a.setCorpNumber(corpNum);
+			myvec.AddHead(a);
+		}
+		myvec.ShowDeque();
+		myvec.FastSort();
+		myvec.ShowDeque();
+		cout << "Введите критерий поиска" << endl;
+		cin >> str;
+		Production elem = myvec.FindeElem(str);
+		cout << "Первый найденный элемент " << endl;
+		cout << elem;
+		cout << "Введите критерий поиска" << endl;
+		cin >> str;
+		myvec.DeleteElem(str);
+		cout << endl;
+		myvec.ShowDeque();
+	}
+	catch (exception &ex)
+	{
+		cout << ex.what() << endl;
+	}
+}
+
+
+
+template<typename T>
+void Algorithm<T>::AddHead(T data)
+{	
+	items.push_back(data);
+	count++;
+}
+
+template<typename T>
+void Algorithm<T>::AddTail(T data)
+{
+	push_front(data);
+	count++;
+}
+
+template<typename T>
+void Algorithm<T>::ShowDeque()
+{
+	try {
+		if (items.empty())
+			throw "The list is empty";
+		for (auto it = items.begin(); it != items.end(); it++)
+		{
+			cout << *it << endl;
+		}
+	}
+	catch (char* str) {
+		cout << str << endl;
+	}
+}
+
+template<typename T>
+void Algorithm<T>::FastSort()
+{
+	FastSort(this->items.begin(), this->items.end());
+}
+
+template<typename T>
+T  Algorithm<T>::FindeElem(string findprops)
+{
+	try 
+	{
+		if (items.empty())
+			throw exception("Попытка просмотра пустого множества");
+		auto i = items.begin();
+		while(i!=items.end())
+		{
+		
+			if (i->getName() == findprops || to_string(i->getNumber()) == findprops || to_string(i->getCorpNumber()) == findprops)
+			{
+				return *i;
+			}
+			i++;
+		}
+	
+	}
+	catch (exception &ex) { cout << ex.what() << endl; }
+}
+
+template<typename T>
+void Algorithm<T>::DeleteElem(string findprops)
+{
+	if (items.size() != 0)
+	{
+		auto i = items.begin();
+		while (i != items.end()) {
+			if (i->getName() == findprops || to_string(i->getNumber()) == findprops || to_string(i->getCorpNumber()) == findprops)
+			{
+				i=items.erase(i);
+			}
+			else
+			i++;
+ 		}
+	}
+	else
+		cout << endl << "The list if empty" << endl;
+}
+
+
+template<typename T>
+void Algorithm<T>::FastSort(deque<Production>::iterator first, deque<Production>::iterator last)
+{
+	if (first != last)
+	{
+				auto left = first;
+				auto right = last;
+				auto pivot = first;
+				left++;
+				while (left != right) 
+				{
+					if (*left > *pivot) 
+					{
+						++left;
+					}
+					else 
+					{
+						while ((left != --right) && (*pivot > *right));
+						iter_swap(left, right);
+					}
+				}
+				--left;
+				iter_swap(first, left);
+				FastSort(first, left);
+				FastSort(right, last);
+	}
+}
